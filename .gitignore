@@ -1,0 +1,7 @@
+logs
+.env
+tiktoken_cache_dir
+src/data
+models
+*.ipynb_checkpoints
+**/__pycache__
