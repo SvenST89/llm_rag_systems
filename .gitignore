@@ -5,3 +5,4 @@ src/data
 models
 *.ipynb_checkpoints
 **/__pycache__
+*ner_v2*
