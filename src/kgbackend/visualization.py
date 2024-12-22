@@ -16,6 +16,7 @@ import matplotlib.patches as patches
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..'))) # Add the parent directory to the path since we work with notebooks
+import logging
 
 # Define the Visualizer class
 class Visualizer:
@@ -146,8 +147,8 @@ class Visualizer:
         Returns:
         - None
         """
-        print("\nFiltered content of visited nodes in order of traversal:")
+        logging.info("\nFiltered content of visited nodes in order of traversal:")
         for i, node in enumerate(traversal_path):
-            print(f"\nStep {i + 1} - Node {node}:")
-            print(f"Filtered Content: {filtered_content.get(node, 'No filtered content available')[:200]}...")  # Print first 200 characters
-            print("-" * 50)
+            logging.info(f"\nStep {i + 1} - Node {node}:")
+            logging.info(f"Filtered Content: {filtered_content.get(node, 'No filtered content available')[:200]}...")  # Print first 200 characters
+            logging.info("-" * 50)

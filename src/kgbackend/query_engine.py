@@ -21,6 +21,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..'))) # Add the parent directory to the path since we work with notebooks
 from typing import List, Tuple, Dict
 import heapq
+import logging
 
 # Define the AnswerCheck class
 class AnswerCheck(BaseModel):
@@ -121,7 +122,7 @@ class QueryEngine:
         priority_queue = []
         distances = {}  # Stores the best known "distance" (inverse of connection strength) to each node
         
-        print("\nTraversing the knowledge graph:")
+        logging.info("\nTraversing the knowledge graph:")
         
         # Initialize priority queue with closest nodes from relevant docs
         for doc in relevant_docs:
@@ -157,10 +158,10 @@ class QueryEngine:
                 expanded_context += "\n" + node_content if expanded_context else node_content
                 
                 # Log the current step for debugging and visualization
-                print(f"\nStep {step} - Node {current_node}:")
-                print(f"Content: {node_content[:100]}...") 
-                print(f"Concepts: {', '.join(node_concepts)}")
-                print("-" * 50)
+                logging.info(f"\nStep {step} - Node {current_node}:")
+                logging.info(f"Content: {node_content[:100]}...") 
+                logging.info(f"Concepts: {', '.join(node_concepts)}")
+                logging.info("-" * 50)
                 
                 # Check if we have a complete answer with the current context
                 is_complete, answer = self._check_answer(query, expanded_context)
@@ -198,10 +199,10 @@ class QueryEngine:
                                 expanded_context += "\n" + neighbor_content if expanded_context else neighbor_content
                                 
                                 # Log the neighbor node information
-                                print(f"\nStep {step} - Node {neighbor} (neighbor of {current_node}):")
-                                print(f"Content: {neighbor_content[:100]}...")
-                                print(f"Concepts: {', '.join(neighbor_concepts)}")
-                                print("-" * 50)
+                                logging.info(f"\nStep {step} - Node {neighbor} (neighbor of {current_node}):")
+                                logging.info(f"Content: {neighbor_content[:100]}...")
+                                logging.info(f"Concepts: {', '.join(neighbor_concepts)}")
+                                logging.info("-" * 50)
                                 
                                 # Check if we have a complete answer after adding the neighbor's content
                                 is_complete, answer = self._check_answer(query, expanded_context)
@@ -220,7 +221,7 @@ class QueryEngine:
 
         # If we haven't found a complete answer, generate one using the LLM
         if not final_answer:
-            print("\nGenerating final answer...")
+            logging.info("\nGenerating final answer...")
             response_prompt = PromptTemplate(
                 input_variables=["query", "context"],
                 template="Based on the following context, please answer the query.\n\nContext: {context}\n\nQuery: {query}\n\nAnswer:"
@@ -245,12 +246,12 @@ class QueryEngine:
           - filtered_content (dict): The filtered content of nodes.
         """
         with get_openai_callback() as cb:
-            print(f"\nProcessing query: {query}")
+            logging.info(f"\nProcessing query: {query}")
             relevant_docs = self._retrieve_relevant_documents(query)
             expanded_context, traversal_path, filtered_content, final_answer = self._expand_context(query, relevant_docs)
             
             if not final_answer:
-                print("\nGenerating final answer...")
+                logging.info("\nGenerating final answer...")
                 response_prompt = PromptTemplate(
                     input_variables=["query", "context"],
                     template="Based on the following context, please answer the query.\n\nContext: {context}\n\nQuery: {query}\n\nAnswer:"
@@ -261,13 +262,13 @@ class QueryEngine:
                 response = response_chain.invoke(input_data)
                 final_answer = response
             else:
-                print("\nComplete answer found during traversal.")
+                logging.info("\nComplete answer found during traversal.")
             
-            print(f"\nFinal Answer: {final_answer}")
-            print(f"\nTotal Tokens: {cb.total_tokens}")
-            print(f"Prompt Tokens: {cb.prompt_tokens}")
-            print(f"Completion Tokens: {cb.completion_tokens}")
-            print(f"Total Cost (USD): ${cb.total_cost}")
+            logging.info(f"\nFinal Answer: {final_answer}")
+            logging.info(f"\nTotal Tokens: {cb.total_tokens}")
+            logging.info(f"Prompt Tokens: {cb.prompt_tokens}")
+            logging.info(f"Completion Tokens: {cb.completion_tokens}")
+            logging.info(f"Total Cost (USD): ${cb.total_cost}")
         
         return final_answer, traversal_path, filtered_content
 
@@ -281,7 +282,7 @@ class QueryEngine:
         Returns:
         - list: A list of relevant documents.
         """
-        print("\nRetrieving relevant documents...")
+        logging.info("\nRetrieving relevant documents...")
         retriever = self.vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 5})
         compressor = LLMChainExtractor.from_llm(self.llm)
         compression_retriever = ContextualCompressionRetriever(base_compressor=compressor, base_retriever=retriever)

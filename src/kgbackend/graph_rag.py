@@ -15,6 +15,8 @@ from kgbackend.doc_processing import DocumentProcessor
 from kgbackend.knowledge_graph import KnowledgeGraph
 from kgbackend.query_engine import QueryEngine
 from kgbackend.visualization import Visualizer
+from utils.utils import log_function
+import logging
 
 class GraphRAG:
     def __init__(self):
@@ -36,7 +38,8 @@ class GraphRAG:
         self.knowledge_graph = KnowledgeGraph(entity_types=True)
         self.query_engine = None
         self.visualizer = Visualizer()
-
+    
+    @log_function
     def process_documents(self, documents):
         """
         Processes a list of documents by splitting them into chunks, embedding them, and building a knowledge graph.
@@ -51,6 +54,7 @@ class GraphRAG:
         self.knowledge_graph.build_graph(splits, self.llm, self.embedding_model)
         self.query_engine = QueryEngine(vector_store, self.knowledge_graph, self.llm)
 
+    @log_function
     def query(self, query: str):
         """
         Handles a query by retrieving relevant information from the knowledge graph and visualizing the traversal path.
@@ -66,6 +70,6 @@ class GraphRAG:
         if traversal_path:
             self.visualizer.visualize_traversal(self.knowledge_graph.graph, traversal_path)
         else:
-            print("No traversal path to visualize.")
+            logging.info("No traversal path to visualize.")
         
         return response

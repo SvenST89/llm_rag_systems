@@ -18,6 +18,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..'))) # Add the parent directory to the path since we work with notebooks
+import logging
 import json
 import subprocess
 from typing import List
@@ -135,7 +136,7 @@ class KnowledgeGraph:
         try:
             return spacy.load("en_core_web_sm")
         except OSError:
-            print("downloading spaCy model via Linux console: python3 -m spacy download...")
+            logging.info("downloading spaCy model via Linux console: python3 -m spacy download...")
             subprocess.run("python3 -m spacy download en_core_web_sm", shell=True)
             #model = spacy.load("de_core_news_sm")
             # locate the model where it is stored with 'model._path' 
@@ -150,8 +151,8 @@ class KnowledgeGraph:
             _entity_types = None
         try:
             entities, json_output = ner.extract_entities(text=content, entity_types=_entity_types)
-            # print(f"Entities in JSON-Format: {json_output}")
-            # print("Entity MILITARY_UNIT:{}".format(entities.MILITARY_UNIT))
+            # logging.info(f"Entities in JSON-Format: {json_output}")
+            # logging.info("Entity MILITARY_UNIT:{}".format(entities.MILITARY_UNIT))
             return entities, json_output
         except ValidationError as e:
             raise ValueError(f"Error extracting entities: {e}")
@@ -172,7 +173,7 @@ class KnowledgeGraph:
         
         # Extract named entities using spaCy
         # doc = self.nlp(content)
-        # print("AVAILABLE ENTITIES of SpaCy: {}".format(doc.ents))
+        # logging.info("AVAILABLE ENTITIES of SpaCy: {}".format(doc.ents))
         # named_entities = [ent.text for ent in doc.ents if ent.label_ in ["PERSON", "ORG", "GPE", "DATE"]]
         entity_dict, json_output = self._run_ner_with_llm(content=content)
         # transform json_output-string into dict
@@ -180,12 +181,12 @@ class KnowledgeGraph:
         d = json.loads(json_output)
         for k in d.keys():
             if k != "OTHER":
-                print("Entity key is:{}".format(k))
+                #logging.info("Entity key is:{}".format(k))
                 entity_list = d[k]
                 for i in entity_list:
                     named_entities.append(i)
             else:
-                print("Entity key is 'OTHER'.")
+                #logging.info("Entity key is 'OTHER'.")
                 entity_dict = d[k]
                 if entity_dict:
                     for ek in entity_dict.keys():
@@ -251,7 +252,7 @@ class KnowledgeGraph:
                                         shared_concepts=list(shared_concepts))
     def _save_graph_locally(self):
         import pickle
-        DATA_DIR = os.path.join(os.getcwd(), 'data/knowledge_graph')
+        DATA_DIR = os.path.join(os.getcwd(), 'src/data/knowledge_graph')
         if not os.path.exists(DATA_DIR):
             os.makedirs(DATA_DIR, exist_ok=True)
         # save graph object to file
