@@ -35,7 +35,7 @@ class LLMNamedEntityRecognizer:
         'PERSON': [list of person names],
         'GPE': [list of cities, regions, countries],
         'ORGANIZATION': [list of companies, non-profit organizations, clubs and other institutions],
-        'MILITARY_UNIT': [list of person names],
+        'MILITARY_UNIT': [list of military units],
         'DATE': [list of absolute or relative dates or periods],
         'TIME': [list of times smaller than a day],
         'OTHER': {{other_entity_type: [list of entities of that other identified type]}}
